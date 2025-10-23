@@ -1,0 +1,461 @@
+<script>
+	import ResumeGameButton from '$lib/components/ResumeGameButton.svelte';
+	import GameStats from '$lib/components/GameStats.svelte';
+	import PortfolioTutorial from '$lib/components/PortfolioTutorial.svelte';
+	import { onMount } from 'svelte';
+	
+	let selectedIndex = $state(0);
+	let showTutorial = $state(false);
+	
+	onMount(() => {
+		// Check if tutorial has been shown before
+		const tutorialShown = sessionStorage.getItem('portfolioTutorialShown');
+		if (!tutorialShown) {
+			showTutorial = true;
+		}
+	});
+	
+	function closeTutorial() {
+		showTutorial = false;
+		sessionStorage.setItem('portfolioTutorialShown', 'true');
+	}
+	
+	const experiences = [
+		{
+			title: "FULL STACK SOFTWARE DEVELOPER",
+			company: "Allwater Marine Group",
+			location: "Charleston, SC",
+			date: "May 2023 - Present",
+			achievements: [
+				"Mentored junior developer on coding techniques and best practices",
+				"Collaborated with product owners to define scope and meet deadlines",
+				"Pioneered CI/CD pipelines for ~2,300% faster release cycle",
+				"Spearheaded .NET MAUI to React Native migration (~1,110% productivity increase)"
+			]
+		},
+		{
+			title: "ASSISTANT CAPTAIN",
+			company: "Towboat US Charleston",
+			location: "Charleston, SC",
+			date: "Apr 2021 - Mar 2023",
+			achievements: [
+				"Assisted with vessel operations and pre/post-voyage checks",
+				"Maintained deck equipment and vessel exterior",
+				"Acted as lookout and supervised deck activities",
+				"Participated in safety and emergency drills"
+			]
+		},
+		{
+			title: "WILDLIFE REHABILITATOR",
+			company: "World Class Wildlife Removal",
+			location: "Largo, FL",
+			date: "Feb 2020 - Apr 2020",
+			achievements: [
+				"Removed wildlife humanely using trapping and relocation",
+				"Inspected properties to identify entry points",
+				"Rehabilitated 100+ animals including snakes and alligators"
+			]
+		},
+		{
+			title: "FOOD RUNNER / BUSSER",
+			company: "Wasabi",
+			location: "Mount Pleasant, SC",
+			date: "Mar 2019 - Mar 2020",
+			achievements: [
+				"Prepared dining areas and supported efficient service",
+				"Provided responsive customer service",
+				"Maintained knowledge of 30+ menu items and specials"
+			]
+		}
+	];
+	
+	function moveUp() {
+		if (selectedIndex > 0) {
+			selectedIndex--;
+		}
+	}
+	
+	function moveDown() {
+		if (selectedIndex < experiences.length - 1) {
+			selectedIndex++;
+		}
+	}
+</script>
+
+<ResumeGameButton />
+<GameStats />
+
+{#if showTutorial}
+	<PortfolioTutorial onComplete={closeTutorial} />
+{/if}
+
+<svelte:window onkeydown={(e) => {
+	if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') {
+		e.preventDefault();
+		moveUp();
+	} else if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') {
+		e.preventDefault();
+		moveDown();
+	}
+}} />
+
+<div class="arcade-screen">
+	<div class="screen-border">
+		<div class="screen-content">
+			<!-- Header -->
+			<header class="arcade-header">
+				<div class="header-line">╔════════════════════════════════════════════════════╗</div>
+				<div class="header-title">║         WORK EXPERIENCE - PLAYER SELECT         ║</div>
+				<div class="header-line">╚════════════════════════════════════════════════════╝</div>
+			</header>
+
+			<!-- Main Display -->
+			<main class="display-area">
+				<!-- Left Column: Experience Select List -->
+				<div class="left-column">
+					<div class="select-list">
+						{#each experiences as exp, i}
+							<button 
+								class="select-item" 
+								class:selected={i === selectedIndex}
+								onclick={() => selectedIndex = i}
+							>
+								<span class="selector">{i === selectedIndex ? '►' : ' '}</span>
+								<span class="job-number">[{i + 1}]</span>
+								<span class="job-title">{exp.title}</span>
+							</button>
+						{/each}
+					</div>
+				</div>
+
+				<!-- Right Column: Details Panel -->
+				<div class="right-column">
+					<div class="details-panel">
+						<div class="panel-border">
+							<div class="detail-header">
+								<div class="company-name">{experiences[selectedIndex].company}</div>
+								<div class="meta-info">
+									<span>{experiences[selectedIndex].location}</span>
+									<span class="separator">|</span>
+									<span>{experiences[selectedIndex].date}</span>
+								</div>
+							</div>
+							
+							<div class="achievements">
+								{#each experiences[selectedIndex].achievements as achievement}
+									<div class="achievement-item">• {achievement}</div>
+								{/each}
+							</div>
+						</div>
+					</div>
+				</div>
+			</main>
+
+			<!-- Controls Footer -->
+			<footer class="arcade-footer">
+				<div class="controls">
+					<button class="control-btn" onclick={moveUp} disabled={selectedIndex === 0}>
+						▲ UP
+					</button>
+					<span class="control-hint">USE ↑↓ OR W/S TO NAVIGATE</span>
+					<button class="control-btn" onclick={moveDown} disabled={selectedIndex === experiences.length - 1}>
+						▼ DOWN
+					</button>
+				</div>
+				<div class="counter">POSITION: {selectedIndex + 1}/{experiences.length}</div>
+			</footer>
+		</div>
+	</div>
+</div>
+
+<style>
+	:global(body) {
+		overflow: hidden;
+		height: 100vh;
+		overscroll-behavior: none;
+	}
+
+	.arcade-screen {
+		height: 100vh;
+		background: #000;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		padding: 1rem;
+		font-family: 'Courier New', monospace;
+		overflow: hidden;
+	}
+
+	.screen-border {
+		background: #1a1a1a;
+		border: 8px solid #333;
+		border-radius: 12px;
+		padding: 1.5rem;
+		box-shadow: 
+			inset 0 0 50px rgba(0, 0, 0, 0.5),
+			0 0 30px rgba(255, 255, 0, 0.2);
+		max-width: 900px;
+		width: 100%;
+		max-height: calc(100vh - 2rem);
+		display: flex;
+		flex-direction: column;
+		overflow: hidden;
+	}
+
+	.screen-content {
+		background: #000;
+		border: 4px solid #444;
+		padding: 1.5rem;
+		display: flex;
+		flex-direction: column;
+		flex: 1;
+		min-height: 0;
+		overflow: hidden;
+	}
+
+	.arcade-header {
+		color: #ffff00;
+		margin-bottom: 2rem;
+		text-align: center;
+		font-size: 0.875rem;
+		line-height: 1.4;
+		flex-shrink: 0;
+	}
+
+	.header-title {
+		letter-spacing: 1px;
+	}
+
+	.display-area {
+		display: grid;
+		grid-template-columns: 1fr 1.5fr;
+		gap: 1.5rem;
+		margin-bottom: 2rem;
+		flex: 1;
+		min-height: 0;
+		overflow: hidden;
+	}
+
+	.left-column {
+		display: flex;
+		flex-direction: column;
+		min-height: 0;
+		overflow: hidden;
+	}
+
+	.right-column {
+		display: flex;
+		flex-direction: column;
+		min-height: 0;
+		overflow: hidden;
+	}
+
+	.select-list {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+	}
+
+	.select-item {
+		background: transparent;
+		border: none;
+		color: #aaa;
+		padding: 0.75rem 1rem;
+		text-align: left;
+		font-family: 'Courier New', monospace;
+		font-size: 1rem;
+		cursor: pointer;
+		transition: all 0.2s;
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+	}
+
+	.select-item.selected {
+		color: #ffff00;
+		background: rgba(255, 255, 0, 0.1);
+		border-left: 4px solid #ffff00;
+	}
+
+	.select-item:hover {
+		color: #fff;
+	}
+
+	.selector {
+		color: #ffff00;
+		font-weight: bold;
+		width: 1rem;
+	}
+
+	.job-number {
+		color: #888;
+		font-size: 0.875rem;
+	}
+
+	.job-title {
+		flex: 1;
+	}
+
+	.details-panel {
+		background: rgba(255, 255, 0, 0.05);
+		border: 2px solid #ffff00;
+		padding: 1.5rem;
+		overflow: hidden;
+		display: flex;
+		flex-direction: column;
+	}
+
+	.panel-border {
+		border-left: 4px solid #ffff00;
+		padding-left: 1rem;
+		overflow-y: auto;
+		flex: 1;
+		min-height: 0;
+	}
+
+	.panel-border::-webkit-scrollbar {
+		width: 6px;
+	}
+
+	.panel-border::-webkit-scrollbar-track {
+		background: transparent;
+	}
+
+	.panel-border::-webkit-scrollbar-thumb {
+		background: #ffff00;
+		border-radius: 3px;
+	}
+
+	.detail-header {
+		margin-bottom: 1.5rem;
+	}
+
+	.company-name {
+		color: #fff;
+		font-size: 1.25rem;
+		font-weight: bold;
+		margin-bottom: 0.5rem;
+	}
+
+	.meta-info {
+		color: #aaa;
+		font-size: 0.875rem;
+	}
+
+	.separator {
+		margin: 0 0.5rem;
+	}
+
+	.achievements {
+		display: flex;
+		flex-direction: column;
+		gap: 0.75rem;
+	}
+
+	.achievement-item {
+		color: #ccc;
+		font-size: 0.9375rem;
+		line-height: 1.5;
+	}
+
+	.arcade-footer {
+		border-top: 2px solid #444;
+		padding-top: 1rem;
+		display: grid;
+		grid-template-columns: 1fr auto;
+		align-items: center;
+		gap: 1rem;
+		flex-shrink: 0;
+	}
+
+	.controls {
+		display: flex;
+		align-items: center;
+		gap: 1rem;
+	}
+
+	.control-btn {
+		background: #222;
+		border: 2px solid #666;
+		color: #ffff00;
+		padding: 0.5rem 1rem;
+		font-family: 'Courier New', monospace;
+		font-size: 0.875rem;
+		cursor: pointer;
+		transition: all 0.2s;
+	}
+
+	.control-btn:hover:not(:disabled) {
+		background: #333;
+		border-color: #ffff00;
+		box-shadow: 0 0 10px rgba(255, 255, 0, 0.3);
+	}
+
+	.control-btn:disabled {
+		opacity: 0.3;
+		cursor: not-allowed;
+	}
+
+	.control-hint {
+		color: #888;
+		font-size: 0.75rem;
+	}
+
+	.counter {
+		color: #ffff00;
+		font-size: 0.875rem;
+	}
+
+	@media (max-width: 768px) {
+		.screen-border {
+			padding: 1rem;
+		}
+
+		.screen-content {
+			padding: 1rem;
+		}
+
+		.arcade-header {
+			font-size: 0.75rem;
+		}
+
+		.display-area {
+			grid-template-columns: 1fr;
+			max-height: none;
+		}
+
+		.left-column {
+			max-height: 250px;
+		}
+
+		.select-item {
+			font-size: 0.875rem;
+			padding: 0.5rem;
+		}
+
+		.company-name {
+			font-size: 1rem;
+		}
+
+		.achievement-item {
+			font-size: 0.875rem;
+		}
+
+		.arcade-footer {
+			grid-template-columns: 1fr;
+		}
+
+		.controls {
+			flex-direction: column;
+			width: 100%;
+		}
+
+		.control-btn {
+			width: 100%;
+		}
+
+		.counter {
+			text-align: center;
+		}
+	}
+</style>
