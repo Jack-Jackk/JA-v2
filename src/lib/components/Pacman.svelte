@@ -1059,8 +1059,8 @@
 		// Add keyboard listener
 		window.addEventListener('keydown', handleKeydown);
 
-		// Add touch listeners for swipe gestures (attach to game area so page can scroll)
-		const touchTarget = document.querySelector('.game-area');
+		// Add touch listeners for swipe gestures (attach to entire game container for mobile)
+		const touchTarget = document.querySelector('.pacman-game-container');
 		if (touchTarget) {
 			touchTarget.addEventListener('touchstart', handleTouchStart, { passive: true });
 			touchTarget.addEventListener('touchend', handleTouchEnd, { passive: true });
@@ -1191,20 +1191,6 @@
 			>
 				{isPaused ? '▶' : '⏸'} {isPaused ? 'Resume' : 'Pause'}
 			</button>
-			<button 
-				class="dropdown-toggle restart-toggle" 
-				onclick={handleRestart}
-				disabled={isRestarting}
-			>
-				↻ Restart
-			</button>
-			<button 
-				class="dropdown-toggle menu-toggle" 
-				onclick={handleReturnToMenu}
-				disabled={isReturningToMenu}
-			>
-				⌂ Home
-			</button>
 		</div>
 		
 		<!-- Mobile Dropdowns -->
@@ -1215,6 +1201,22 @@
 						<span class="control-icon pixel-gamepad">▶</span>
 						<span class="control-text">Swipe to move</span>
 					</div>
+					<button 
+						class="dropdown-action-btn" 
+						onclick={handleRestart}
+						disabled={isRestarting}
+					>
+						<span class="control-icon">↻</span>
+						<span class="control-text">Restart Game</span>
+					</button>
+					<button 
+						class="dropdown-action-btn" 
+						onclick={handleReturnToMenu}
+						disabled={isReturningToMenu}
+					>
+						<span class="control-icon">⌂</span>
+						<span class="control-text">Return to Home</span>
+					</button>
 				{/if}
 			</div>
 		{/if}
@@ -1383,10 +1385,15 @@
 
 <style>
 	/* Prevent scrolling and bouncing */
+	:global(html) {
+		background-color: #000;
+	}
+	
 	:global(body) {
 		overflow: hidden;
 		height: 100vh;
 		overscroll-behavior: none;
+		background-color: #000;
 	}
 
 	/* Start Menu Styles */
@@ -2268,6 +2275,49 @@
 		padding: 0.5rem 0;
 		color: #f7f6f6ff;
 		font-size: 0.875rem;
+	}
+	
+	.dropdown-action-btn {
+		width: 100%;
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+		padding: 0.75rem;
+		margin: 0.25rem 0;
+		background: rgba(37, 99, 235, 0.2);
+		border: 2px solid rgba(37, 99, 235, 0.4);
+		color: #f7f6f6ff;
+		font-family: 'Courier New', monospace;
+		font-size: 0.875rem;
+		cursor: pointer;
+		border-radius: 6px;
+		transition: all 0.2s;
+		font-weight: bold;
+	}
+	
+	.dropdown-action-btn:hover {
+		background: rgba(37, 99, 235, 0.3);
+		border-color: rgba(37, 99, 235, 0.6);
+	}
+	
+	.dropdown-action-btn:active {
+		transform: scale(0.98);
+	}
+	
+	.dropdown-action-btn:disabled {
+		opacity: 0.5;
+		cursor: not-allowed;
+	}
+	
+	.dropdown-action-btn .control-icon {
+		color: #00FFFF;
+		text-shadow: 0 0 5px #00FFFF;
+		font-size: 1.25rem;
+	}
+	
+	.dropdown-action-btn .control-text {
+		flex: 1;
+		text-align: left;
 	}
 	
 	/* Responsive Design */
