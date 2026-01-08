@@ -123,8 +123,18 @@
 
 <div class="page-container">
 	<div class="mobile-header">
-		<ResumeGameButton />
 		<GameStats />
+		<div class="mobile-controls">
+			<div class="mobile-nav-row">
+				<button class="control-btn" onclick={moveUp} disabled={selectedIndex === 0}>
+					▲ UP
+				</button>
+				<button class="control-btn" onclick={moveDown} disabled={selectedIndex === projects.length - 1}>
+					▼ DOWN
+				</button>
+			</div>
+			<ResumeGameButton />
+		</div>
 	</div>
 
 	<div class="arcade-screen">
@@ -226,6 +236,10 @@
 		display: none;
 	}
 	
+	.mobile-controls {
+		display: none;
+	}
+	
 	@media (max-width: 768px) {
 		.page-container {
 			overflow-y: auto;
@@ -236,9 +250,54 @@
 			display: flex;
 			flex-direction: column;
 			align-items: center;
-			padding: 1rem 0.5rem 0 0.5rem;
+			padding: 3rem 0.5rem 0 0.5rem;
 			gap: 0.5rem;
 			background: #000;
+		}
+		
+		.mobile-controls {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			gap: 0.75rem;
+			width: 100%;
+			max-width: 400px;
+			margin: 0 auto;
+		}
+		
+		.mobile-nav-row {
+			display: flex;
+			gap: 1rem;
+			width: 100%;
+			justify-content: space-between;
+		}
+		
+		.mobile-nav-row .control-btn {
+			flex: 1;
+			padding: 0.75rem;
+			background: rgba(37, 99, 235, 0.2);
+			border: 2px solid rgba(37, 99, 235, 0.4);
+			color: #00FFFF;
+			font-family: 'Courier New', monospace;
+			font-size: 1rem;
+			cursor: pointer;
+			border-radius: 8px;
+			transition: all 0.2s;
+			font-weight: bold;
+		}
+		
+		.mobile-nav-row .control-btn:hover:not(:disabled) {
+			background: rgba(37, 99, 235, 0.3);
+			border-color: rgba(37, 99, 235, 0.6);
+		}
+		
+		.mobile-nav-row .control-btn:disabled {
+			opacity: 0.4;
+			cursor: not-allowed;
+		}
+		
+		.arcade-footer {
+			display: none;
 		}
 		
 		.arcade-screen {
