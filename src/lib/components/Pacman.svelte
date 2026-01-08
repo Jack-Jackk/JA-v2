@@ -76,6 +76,11 @@
 	let highlightedNav = $state(null); // Track which nav link to highlight
 	let navHighlightTimeout = $state(null);
 	
+	// Countdown state for resuming game
+	let showCountdown = $state(false);
+	let countdownValue = $state(3);
+	let countdownInterval = $state(null);
+	
 	// Check if position is in unreachable area
 	function isUnreachablePosition(x, y) {
 		// Top-left unreachable area: (0,8) to (4,8) and (0,12) to (4,12)
@@ -194,6 +199,30 @@
 		sessionStorage.setItem('pacmanGameState', JSON.stringify(gameState));
 	}
 	
+	// Resume game with countdown
+	function resumeGame() {
+		// Start countdown
+		showCountdown = true;
+		countdownValue = 3;
+		
+		countdownInterval = setInterval(() => {
+			countdownValue--;
+			if (countdownValue <= 0) {
+				clearInterval(countdownInterval);
+				countdownInterval = null;
+				showCountdown = false;
+				
+				// Actually resume the game
+				isPaused = false;
+				gameLoopId = setInterval(gameLoop, GAME_SPEED);
+				ghostLoopId = setInterval(ghostLoop, GHOST_SPEED);
+				
+				// Save game state after resuming so button stays visible
+				saveGameState();
+			}
+		}, 1000);
+	}
+	
 	// Restore game state from sessionStorage
 	function restoreGameState() {
 		const savedState = sessionStorage.getItem('pacmanGameState');
@@ -213,21 +242,18 @@
 			powerMode = gameState.powerMode;
 			fruitsCollectedCount = gameState.fruitsCollectedCount;
 			
-			// Clear the saved state
-			sessionStorage.removeItem('pacmanGameState');
+			// Don't clear the saved state - keep it so button stays visible
+			// It will be updated as the game continues
 			
-			// Resume game
+			// Resume game with countdown
 			gameStarted = true;
-			isPaused = false;
+			isPaused = true; // Set paused so countdown can start properly
 			
 			// Activate power mode when returning from a fruit page
 			activatePowerMode();
 			
-			// Restart game loops
-			if (gameLoopId) clearInterval(gameLoopId);
-			if (ghostLoopId) clearInterval(ghostLoopId);
-			gameLoopId = setInterval(gameLoop, GAME_SPEED);
-			ghostLoopId = setInterval(ghostLoop, GHOST_SPEED);
+			// Start countdown before resuming
+			resumeGame();
 			
 			return true;
 		}
@@ -364,17 +390,14 @@
 						}, 5000);
 					}
 					
-					// Pause the game
-					isPaused = true;
-					
-					// Clear intervals when paused
+					// Clear intervals (but don't set isPaused to avoid showing overlay)
 					if (gameLoopId) clearInterval(gameLoopId);
 					if (ghostLoopId) clearInterval(ghostLoopId);
 					
 					// Save game state
 					saveGameState();
 					
-					// Navigate to fruit's route
+					// Navigate to fruit's route immediately without showing pause overlay
 					goto(fruit.route);
 				}
 			}
@@ -664,14 +687,14 @@
 		// Check if swipe meets minimum distance
 		if (absX < minSwipeDistance && absY < minSwipeDistance) return;
 
-		// Determine swipe direction
+		// Determine swipe direction (uppercase to match DIRECTIONS)
 		let swipeDirection = null;
 		if (absX > absY) {
 			// Horizontal swipe
-			swipeDirection = deltaX > 0 ? 'right' : 'left';
+			swipeDirection = deltaX > 0 ? 'RIGHT' : 'LEFT';
 		} else {
 			// Vertical swipe
-			swipeDirection = deltaY > 0 ? 'down' : 'up';
+			swipeDirection = deltaY > 0 ? 'DOWN' : 'UP';
 		}
 
 		if (swipeDirection) {
@@ -742,16 +765,14 @@
 
 	// Toggle pause
 	function togglePause() {
-		isPaused = !isPaused;
-		
 		if (isPaused) {
-			// Clear intervals when paused
+			// Resuming - show countdown
+			resumeGame();
+		} else {
+			// Pausing - stop immediately
+			isPaused = true;
 			if (gameLoopId) clearInterval(gameLoopId);
 			if (ghostLoopId) clearInterval(ghostLoopId);
-		} else {
-			// Restart intervals when unpaused
-			gameLoopId = setInterval(gameLoop, GAME_SPEED);
-			ghostLoopId = setInterval(ghostLoop, GHOST_SPEED);
 		}
 	}
 	
@@ -956,28 +977,38 @@
 
 	// Setup event listeners
 	onMount(() => {
+		// Only redirect if in standalone (PWA) app context; allow mobile web
+		const isStandalone = window.matchMedia('(display-mode: standalone)').matches 
+			|| window.navigator.standalone 
+			|| document.referrer.includes('android-app://');
+		if (isStandalone) {
+			window.location.href = 'https://portfolio.jackabeyta.com';
+			return;
+		}
+		
 		// Check if there's a saved game state to restore
 		const hasRestoredGame = restoreGameState();
 		
 		// Add keyboard listener
 		window.addEventListener('keydown', handleKeydown);
 
-		// Add touch listeners for swipe gestures
-		const gameContainer = document.querySelector('.pacman-game-container');
-		if (gameContainer) {
-			gameContainer.addEventListener('touchstart', handleTouchStart, { passive: true });
-			gameContainer.addEventListener('touchend', handleTouchEnd, { passive: true });
+		// Add touch listeners for swipe gestures (attach to game area so page can scroll)
+		const touchTarget = document.querySelector('.game-area');
+		if (touchTarget) {
+			touchTarget.addEventListener('touchstart', handleTouchStart, { passive: true });
+			touchTarget.addEventListener('touchend', handleTouchEnd, { passive: true });
 		}
 
 		// Cleanup
 		return () => {
 			window.removeEventListener('keydown', handleKeydown);
-			if (gameContainer) {
-				gameContainer.removeEventListener('touchstart', handleTouchStart);
-				gameContainer.removeEventListener('touchend', handleTouchEnd);
+			if (touchTarget) {
+				touchTarget.removeEventListener('touchstart', handleTouchStart);
+				touchTarget.removeEventListener('touchend', handleTouchEnd);
 			}
 			if (gameLoopId) clearInterval(gameLoopId);
 			if (ghostLoopId) clearInterval(ghostLoopId);
+			if (countdownInterval) clearInterval(countdownInterval);
 			if (invincibilityTimeout) clearTimeout(invincibilityTimeout);
 			if (powerModeTimeout) clearTimeout(powerModeTimeout);
 			if (powerPelletRespawnTimeout) clearTimeout(powerPelletRespawnTimeout);
@@ -986,7 +1017,7 @@
 	});
 </script>
 
-<div class="pacman-game-container" style="touch-action: none; user-select: none;">
+<div class="pacman-game-container">
 	<!-- Start Menu -->
 	{#if !gameStarted}
 		<div class="start-menu">
@@ -1009,9 +1040,15 @@
 						</div>
 					</div>
 
-                    <button onclick={startGame} class="menu-button start-button">
-						▶ START GAME
-					</button>
+					<div class="button-row">
+						<a href="https://portfolio.jackabeyta.com" target="_blank" rel="noopener noreferrer" class="regular-site-link">
+							View the regular website →
+						</a>
+
+						<button onclick={startGame} class="menu-button start-button">
+							▶ START GAME
+						</button>
+					</div>
 					
 					<a href="/disclaimer" class="disclaimer-link">
 						Legal Disclaimer & Fair Use
@@ -1153,11 +1190,21 @@
 			{/if}
 
 			<!-- Pause Overlay -->
-			{#if isPaused && !isGameOver}
+			{#if isPaused && !isGameOver && !showCountdown}
 				<div class="pause-overlay">
 					<div class="pause-content">
-						<h2><span class="pixel-pause-large">║ ║</span> Paused</h2>
+						<h2><span class="pixel-pause-large">║</span> Paused</h2>
 						<p>Press <kbd>Space</kbd> to continue</p>
+					</div>
+				</div>
+			{/if}
+
+			<!-- Countdown Overlay -->
+			{#if showCountdown}
+				<div class="countdown-overlay">
+					<div class="countdown-content">
+						<h2>Get Ready!</h2>
+						<div class="countdown-number">{countdownValue}</div>
 					</div>
 				</div>
 			{/if}
@@ -1264,8 +1311,8 @@
 	}
 
 	.menu-button {
-		padding: 1rem 2rem;
-		font-size: 1.5rem;
+		padding: 0.65rem 1.5rem;
+		font-size: 1.1rem;
 		font-weight: bold;
 		font-family: 'Courier New', monospace;
 		border: 3px solid #2563eb;
@@ -1273,7 +1320,7 @@
 		cursor: pointer;
 		transition: all 0.3s;
 		text-transform: uppercase;
-		letter-spacing: 2px;
+		letter-spacing: 1.5px;
 	}
 
 	.start-button {
@@ -1349,6 +1396,42 @@
 
 	.instructions p {
 		margin: 0.5rem 0;
+	}
+
+	.button-row {
+		display: flex;
+		gap: 0.75rem;
+		align-items: stretch;
+		margin: 1rem 0;
+		max-width: 500px;
+		margin-left: auto;
+		margin-right: auto;
+	}
+
+	.button-row > * {
+		flex: 1;
+	}
+
+	.regular-site-link {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		padding: 0.65rem 1.2rem;
+		color: #00FFFF;
+		text-decoration: none;
+		font-family: 'Courier New', monospace;
+		font-size: 0.9rem;
+		transition: all 0.2s ease;
+		text-align: center;
+		border: 2px solid #00FFFF;
+		border-radius: 8px;
+		background: rgba(0, 255, 255, 0.1);
+	}
+
+	.regular-site-link:hover {
+		background: rgba(0, 255, 255, 0.2);
+		box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+		transform: translateY(-2px);
 	}
 
 	.disclaimer-link {
@@ -1576,6 +1659,8 @@
 	.game-area {
 		position: relative;
 		flex-shrink: 0;
+		/* Prevent page scroll from interfering with game gestures on desktop */
+		touch-action: none;
 	}
 
 	/* Side Panel Styling */
@@ -1875,6 +1960,68 @@
 		box-shadow: 0 0 5px rgba(37, 99, 235, 0.3);
 	}
 
+	/* Countdown Overlay */
+	.countdown-overlay {
+		position: absolute;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		background-color: rgba(0, 0, 0, 0.7);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		backdrop-filter: blur(2px);
+		z-index: 100;
+	}
+
+	.countdown-content {
+		text-align: center;
+		color: white;
+		padding: 3rem;
+	}
+
+	.countdown-content h2 {
+		font-size: 2rem;
+		margin: 0 0 1rem 0;
+		color: #FFFF00;
+		text-shadow: 0 0 20px #FFFF00;
+		font-family: 'Courier New', monospace;
+		animation: pulse 0.5s ease-in-out infinite alternate;
+	}
+
+	.countdown-number {
+		font-size: 6rem;
+		font-weight: bold;
+		color: #00FFFF;
+		font-family: 'Courier New', monospace;
+		text-shadow: 0 0 40px #00FFFF;
+		animation: countdown-pulse 1s ease-in-out;
+	}
+
+	@keyframes countdown-pulse {
+		0% {
+			transform: scale(0.5);
+			opacity: 0;
+		}
+		50% {
+			transform: scale(1.2);
+		}
+		100% {
+			transform: scale(1);
+			opacity: 1;
+		}
+	}
+
+	@keyframes pulse {
+		from {
+			opacity: 0.8;
+		}
+		to {
+			opacity: 1;
+		}
+	}
+
 	/* Responsive Design */
 	@media (max-width: 1200px) {
 		.game-layout {
@@ -1902,6 +2049,13 @@
 	@media (max-width: 768px) {
 		.pacman-game-container {
 			padding: 1rem;
+			/* Allow scrolling on small screens */
+			overflow-y: auto;
+		}
+
+		/* Allow page scroll while still capturing swipes in game area */
+		.game-area {
+			touch-action: pan-y;
 		}
 
 		.game-title {
@@ -1916,5 +2070,34 @@
 			margin-bottom: 1rem;
 			padding-bottom: 1rem;
 		}
+
+		.button-row {
+			flex-direction: column;
+		}
+
+		/* Place mobile controls under the canvas on small screens */
+		.mobile-controls {
+			position: static;
+			display: block;
+			margin-top: 0.75rem;
+			width: 100%;
+			height: auto;
+			max-width: 560px;
+			margin-left: auto;
+			margin-right: auto;
+		}
+
+		/* Arrange D-pad in a simple grid */
+		.mobile-controls {
+			display: grid;
+			grid-template-columns: 1fr 1fr 1fr;
+			grid-template-rows: auto auto auto;
+			gap: 0.5rem;
+		}
+
+		.control-up { grid-column: 2; grid-row: 1; }
+		.control-left { grid-column: 1; grid-row: 2; }
+		.control-right { grid-column: 3; grid-row: 2; }
+		.control-down { grid-column: 2; grid-row: 3; }
 	}
 </style>

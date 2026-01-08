@@ -42,8 +42,7 @@
 			description: "Advanced collegiate-level coursework",
 			details: [
 				"College-prep curriculum",
-				"Advanced placement courses",
-				"Academic excellence focus"
+				"Teamwork and Collaboration"
 			]
 		},
 		{
@@ -55,40 +54,38 @@
 			details: [
 				"Self-directed learning",
 				"Flexible schedule management",
-				"Strong time management skills"
+				"Allowed time for work ontop of classes"
 			]
 		},
 		{
 			title: "JAPANESE (日本語)",
 			category: "LANGUAGE",
-			type: "JLPT N3 Level",
+			type: "JLPT N4 Level",
 			date: "Current",
 			description: "Intermediate proficiency in Japanese language",
 			details: [
-				"Conversational fluency",
-				"Kanji reading/writing (N3 level)"
+				"Basic Understanding",
+				"Kanji reading/writing"
 			]
 		},
 		{
 			title: "FRENCH (FRANÇAIS)",
 			category: "LANGUAGE",
-			type: "B1 Level",
+			type: "A2 Level",
 			date: "Current",
 			description: "Intermediate French language proficiency",
 			details: [
-				"Conversational ability",
-				"Reading comprehension",
-				"Basic writing skills"
+				"basic Understanding",
+				"Reading comprehension"
 			]
 		},
 		{
 			title: "SPANISH (ESPAÑOL)",
 			category: "LANGUAGE",
-			type: "B1 Level",
+			type: "A2 Level",
 			date: "Current",
 			description: "Intermediate Spanish language proficiency",
 			details: [
-				"Conversational ability",
 				"Travel communication",
 				"Cultural understanding"
 			]
@@ -101,8 +98,8 @@
 			description: "Rebuilt an app that took 3 years, in 3 months utilizing new technologies..",
 			details: [
 				"Reduced deployment time dramatically",
-				"Automated testing integration",
-				"Ensured compliance with HIPAA, GDPR, and other regulations. "
+				"Revamped to meet current software standards,",
+				"Ensured compliance with international regulations. "
 			]
 		},
 		{
@@ -134,9 +131,9 @@
 			category: "SKILL",
 			type: "Marine Expertise",
 			date: "2021 - 2023",
-			description: "Professional maritime operations experience",
+			description: "Maritime operations experience",
 			details: [
-				"Commercial vessel operation",
+				"Maritime vessel operation",
 				"Safety protocols & compliance",
 				"Navigation & seamanship"
 			]
@@ -148,7 +145,7 @@
 			date: "Ongoing",
 			description: "Leading technical team on complex projects",
 			details: [
-				"Agile methodology expertise",
+				"Agile methodology",
 				"Cross-functional collaboration",
 				"Technical decision-making"
 			]

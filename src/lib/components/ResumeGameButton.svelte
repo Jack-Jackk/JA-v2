@@ -1,13 +1,23 @@
 <script>
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
+	import { page } from '$app/stores';
 	
 	let hasGameState = $state(false);
 	
+	// Check for game state on mount and when page changes (navigation)
 	onMount(() => {
-		// Check if there's a saved game state
-		hasGameState = sessionStorage.getItem('pacmanGameState') !== null;
+		checkGameState();
+		
+		// Set up interval to periodically check for game state
+		const interval = setInterval(checkGameState, 500);
+		
+		return () => clearInterval(interval);
 	});
+	
+	function checkGameState() {
+		hasGameState = sessionStorage.getItem('pacmanGameState') !== null;
+	}
 	
 	function resumeGame() {
 		goto('/');
@@ -28,7 +38,7 @@
 		position: fixed;
 		top: 2rem;
 		right: 2rem;
-		z-index: 1000;
+		z-index: 2000;
 		animation: pulse-glow 2s ease-in-out infinite;
 	}
 	

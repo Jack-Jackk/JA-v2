@@ -29,8 +29,8 @@
 			achievements: [
 				"Mentored junior developer on coding techniques and best practices",
 				"Collaborated with product owners to define scope and meet deadlines",
-				"Pioneered CI/CD pipelines for ~2,300% faster release cycle",
-				"Spearheaded .NET MAUI to React Native migration (~1,110% productivity increase)"
+				"Pioneered a much faster release cycle",
+				"Spearheaded .NET MAUI to React Native migration"
 			]
 		},
 		{
