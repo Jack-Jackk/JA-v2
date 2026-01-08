@@ -183,6 +183,8 @@
 <style>
 	.game-canvas-wrapper {
 		display: inline-block;
+		border: 3px solid #000;
+		box-shadow: 0 0 0 3px #000;
 	}
 
 	.cell {

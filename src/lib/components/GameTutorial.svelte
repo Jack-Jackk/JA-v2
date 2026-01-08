@@ -8,9 +8,10 @@
 		{
 			title: "CONTROLS",
 			content: [
-				{ icon: "↑ ↓ ← →", label: "Arrow Keys", description: "Move Jac-Man", isControl: true },
-				{ icon: "W A S D", label: "WASD Keys", description: "Alternative movement", isControl: true },
-				{ icon: "ESC", label: "Pause", description: "Pause/Resume game", isControl: true },
+				{ icon: "↑ ↓ ← →", label: "Arrow Keys", description: "Move Jac-Man (Desktop)", isControl: true },
+				{ icon: "W A S D", label: "WASD Keys", description: "Alternative movement (Desktop)", isControl: true },
+				{ icon: "👆", label: "Swipe", description: "Move Jac-Man (Mobile)", isControl: true },
+				{ icon: "ESC", label: "Pause", description: "Pause/Resume game (Desktop)", isControl: true },
 				{ icon: "R", label: "Restart", description: "Restart game", isControl: true }
 			]
 		},

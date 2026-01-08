@@ -43,7 +43,7 @@
 			date: "2023 - Present",
 			description: "Platform connecting creators to customers through innovative algorithms",
 			highlights: [
-				"Infrastructure to serve 50,000+ customers and creators",
+				"Infrastructure to intelligently serve customers and creators",
 				"Optimized user experience algorithms",
 				"Easy-to-use interfaces and social experiences"
 			],
@@ -57,8 +57,8 @@
 			description: "Automated safety monitoring that alerts trusted contacts when you need help most. Set & forget emergency tracking with GPS, crash detection, and privacy-first design",
 			highlights: [
 				"Automated SMS alerts with location history access",
-				"Advanced crash detection and speed/depth sensors",
-				"Privacy-first: location deleted after check-in",
+				"Advanced crash detection and alert system",
+				"Privacy-first: locations deleted after check-in",
 				"Scalable infrastructure for fluctuating MAUs"
 			],
 			tech: ["React Native", "Expo", "Google Cloud", "NeonDB"],
@@ -66,7 +66,7 @@
 		},
 		{
 			title: "Burn Journal",
-			role: "Front-End Developer",
+			role: "Lead Developer",
 			status: "ACTIVE",
 			date: "2025",
 			description: "A therapeutic journaling app where writing meets release. Features Quick Notes, Weekly/Monthly journals with unique burn animation for emotional catharsis",
@@ -107,9 +107,6 @@
 	}
 </script>
 
-<ResumeGameButton />
-<GameStats />
-
 {#if showTutorial}
 	<PortfolioTutorial onComplete={closeTutorial} />
 {/if}
@@ -124,7 +121,13 @@
 	}
 }} />
 
-<div class="arcade-screen">
+<div class="page-container">
+	<div class="mobile-header">
+		<ResumeGameButton />
+		<GameStats />
+	</div>
+
+	<div class="arcade-screen">
 	<div class="screen-border">
 		<div class="screen-content">
 			<!-- Header -->
@@ -210,9 +213,40 @@
 			</footer>
 		</div>
 	</div>
+	</div>
 </div>
 
 <style>
+	.page-container {
+		width: 100%;
+		height: 100%;
+	}
+	
+	.mobile-header {
+		display: none;
+	}
+	
+	@media (max-width: 768px) {
+		.page-container {
+			overflow-y: auto;
+			height: 100vh;
+		}
+		
+		.mobile-header {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			padding: 1rem 0.5rem 0 0.5rem;
+			gap: 0.5rem;
+			background: #000;
+		}
+		
+		.arcade-screen {
+			height: auto;
+			min-height: calc(100vh - 8rem);
+		}
+	}
+	
 	:global(body) {
 		overflow: hidden;
 		height: 100vh;
@@ -543,55 +577,85 @@
 	}
 
 	@media (max-width: 768px) {
+		.arcade-screen {
+			padding: 0.5rem;
+		}
+		
 		.screen-border {
-			padding: 1rem;
+			padding: 0.75rem;
+			border-width: 4px;
 		}
 
 		.screen-content {
-			padding: 1rem;
+			padding: 0.75rem;
 		}
 
 		.arcade-header {
-			font-size: 0.75rem;
+			font-size: 0.65rem;
+			margin-bottom: 1rem;
 		}
 
 		.display-area {
 			grid-template-columns: 1fr;
 			max-height: none;
+			gap: 1rem;
 		}
 
 		.left-column {
-			max-height: 250px;
+			max-height: 200px;
+			overflow-y: auto;
+		}
+		
+		.right-column {
+			overflow-y: auto;
+			max-height: 300px;
 		}
 
 		.select-item {
-			font-size: 0.875rem;
-			padding: 0.5rem;
+			font-size: 0.8125rem;
+			padding: 0.5rem 0.75rem;
+			gap: 0.5rem;
 		}
 
 		.project-name {
-			font-size: 1rem;
+			font-size: 0.9375rem;
 		}
 
 		.description, .highlight-item {
 			font-size: 0.8125rem;
+			line-height: 1.5;
+		}
+		
+		.tech-badge {
+			font-size: 0.6875rem;
+			padding: 0.125rem 0.375rem;
 		}
 
 		.arcade-footer {
 			grid-template-columns: 1fr;
+			gap: 0.75rem;
 		}
 
 		.controls {
 			flex-direction: column;
 			width: 100%;
+			gap: 0.5rem;
 		}
 
 		.control-btn {
 			width: 100%;
+			padding: 0.625rem 1rem;
+			font-size: 0.9375rem;
+			touch-action: manipulation;
+		}
+		
+		.control-hint {
+			font-size: 0.6875rem;
 		}
 
 		.counter {
 			text-align: center;
+			font-size: 0.8125rem;
 		}
 	}
 </style>

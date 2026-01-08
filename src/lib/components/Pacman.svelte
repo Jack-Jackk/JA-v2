@@ -70,6 +70,10 @@
 	let powerPelletRespawnTimeout = $state(null);
 	let fruitRespawnTimeout = $state(null);
 	
+	// Mobile dropdown states
+	let showControlsDropdown = $state(false);
+	let showNavDropdown = $state(false);
+	
 	// Randomized maze mode
 	let isRandomMazeMode = $state(false);
 	let currentMaze = $state(MAZE_LAYOUT);
@@ -80,6 +84,11 @@
 	let showCountdown = $state(false);
 	let countdownValue = $state(3);
 	let countdownInterval = $state(null);
+	
+	// Debounce flag for pause toggle
+	let isPauseToggling = $state(false);
+	let isRestarting = $state(false);
+	let isReturningToMenu = $state(false);
 	
 	// Check if position is in unreachable area
 	function isUnreachablePosition(x, y) {
@@ -201,6 +210,11 @@
 	
 	// Resume game with countdown
 	function resumeGame() {
+		// Prevent resume if already resuming or countdown is active
+		if (showCountdown || isPauseToggling) return;
+		
+		isPauseToggling = true;
+		
 		// Start countdown
 		showCountdown = true;
 		countdownValue = 3;
@@ -212,6 +226,10 @@
 				countdownInterval = null;
 				showCountdown = false;
 				
+				// Clear any existing intervals before starting new ones
+				if (gameLoopId) clearInterval(gameLoopId);
+				if (ghostLoopId) clearInterval(ghostLoopId);
+				
 				// Actually resume the game
 				isPaused = false;
 				gameLoopId = setInterval(gameLoop, GAME_SPEED);
@@ -219,6 +237,9 @@
 				
 				// Save game state after resuming so button stays visible
 				saveGameState();
+				
+				// Reset toggling flag
+				isPauseToggling = false;
 			}
 		}, 1000);
 	}
@@ -704,18 +725,23 @@
 
 	// Helper function to set direction (used by both keyboard and touch)
 	function setDirection(newDirection) {
-		const dirVector = DIRECTIONS[newDirection];
+		// Convert to uppercase to match DIRECTIONS keys
+		const directionUpper = typeof newDirection === 'string' ? newDirection.toUpperCase() : newDirection;
+		const dirVector = DIRECTIONS[directionUpper];
+		
+		if (!dirVector) return; // Invalid direction
+		
 		const testX = player.x + dirVector.x;
 		const testY = player.y + dirVector.y;
 		
 		// Only queue the direction if it's valid
 		if (!checkWallCollision(testX, testY, currentMaze)) {
-			lastDirection = newDirection;
-			nextDirection = newDirection;
+			lastDirection = directionUpper;
+			nextDirection = directionUpper;
 			
 			// Set initial direction if this is first movement
 			if (direction === null) {
-				direction = newDirection;
+				direction = directionUpper;
 			}
 		}
 		// Otherwise ignore the input
@@ -765,14 +791,31 @@
 
 	// Toggle pause
 	function togglePause() {
+		// Prevent toggling if already in process or countdown is active
+		if (isPauseToggling || showCountdown) return;
+		
 		if (isPaused) {
 			// Resuming - show countdown
 			resumeGame();
 		} else {
 			// Pausing - stop immediately
+			isPauseToggling = true;
 			isPaused = true;
-			if (gameLoopId) clearInterval(gameLoopId);
-			if (ghostLoopId) clearInterval(ghostLoopId);
+			
+			// Clear intervals
+			if (gameLoopId) {
+				clearInterval(gameLoopId);
+				gameLoopId = null;
+			}
+			if (ghostLoopId) {
+				clearInterval(ghostLoopId);
+				ghostLoopId = null;
+			}
+			
+			// Reset toggling flag after a brief delay
+			setTimeout(() => {
+				isPauseToggling = false;
+			}, 100);
 		}
 	}
 	
@@ -793,6 +836,30 @@
 		isGameOver = false;
 		isPaused = false;
 		showNameEntry = false;
+	}
+	
+	// Debounced restart handler
+	function handleRestart() {
+		if (isRestarting) return;
+		
+		isRestarting = true;
+		restartGame();
+		
+		setTimeout(() => {
+			isRestarting = false;
+		}, 500);
+	}
+	
+	// Debounced return to menu handler
+	function handleReturnToMenu() {
+		if (isReturningToMenu) return;
+		
+		isReturningToMenu = true;
+		returnToStartMenu();
+		
+		setTimeout(() => {
+			isReturningToMenu = false;
+		}, 500);
 	}
 	
 	// Handle name entry input
@@ -1094,6 +1161,80 @@
 				</span>
 			</div>
 		</div>
+		
+		<!-- Mobile Dropdown Toggles (only visible on mobile) -->
+		<div class="mobile-dropdown-toggles">
+			<button 
+				class="dropdown-toggle" 
+				class:active={showControlsDropdown}
+				onclick={() => {
+					showControlsDropdown = !showControlsDropdown;
+					if (showControlsDropdown) showNavDropdown = false;
+				}}
+			>
+				{showControlsDropdown ? '▼' : '▶'} Controls
+			</button>
+			<button 
+				class="dropdown-toggle" 
+				class:active={showNavDropdown}
+				onclick={() => {
+					showNavDropdown = !showNavDropdown;
+					if (showNavDropdown) showControlsDropdown = false;
+				}}
+			>
+				{showNavDropdown ? '▼' : '▶'} Navigation
+			</button>
+			<button 
+				class="dropdown-toggle pause-toggle" 
+				onclick={togglePause}
+				disabled={isPauseToggling || showCountdown}
+			>
+				{isPaused ? '▶' : '⏸'} {isPaused ? 'Resume' : 'Pause'}
+			</button>
+			<button 
+				class="dropdown-toggle restart-toggle" 
+				onclick={handleRestart}
+				disabled={isRestarting}
+			>
+				↻ Restart
+			</button>
+			<button 
+				class="dropdown-toggle menu-toggle" 
+				onclick={handleReturnToMenu}
+				disabled={isReturningToMenu}
+			>
+				⌂ Home
+			</button>
+		</div>
+		
+		<!-- Mobile Dropdowns -->
+		{#if showControlsDropdown}
+			<div class="mobile-dropdown controls-dropdown">
+				{#if !showNameEntry}
+					<div class="control-item">
+						<span class="control-icon pixel-gamepad">▶</span>
+						<span class="control-text">Swipe to move</span>
+					</div>
+				{/if}
+			</div>
+		{/if}
+		
+		{#if showNavDropdown}
+			<div class="mobile-dropdown nav-dropdown">
+				<a href="/experience" class="nav-link" class:highlighted={highlightedNav === '/experience'}>
+					<span class="nav-icon pixel-briefcase">▣</span>
+					<span class="nav-text">Experience</span>
+				</a>
+				<a href="/projects" class="nav-link" class:highlighted={highlightedNav === '/projects'}>
+					<span class="nav-icon pixel-rocket">▲</span>
+					<span class="nav-text">Projects</span>
+				</a>
+				<a href="/achievements" class="nav-link" class:highlighted={highlightedNav === '/achievements'}>
+					<span class="nav-icon pixel-trophy">◆</span>
+					<span class="nav-text">Achievements</span>
+				</a>
+			</div>
+		{/if}
 	</header>
 
 	<!-- Main Game Layout: Left Panel + Canvas + Right Panel -->
@@ -1194,7 +1335,7 @@
 				<div class="pause-overlay">
 					<div class="pause-content">
 						<h2><span class="pixel-pause-large">║</span> Paused</h2>
-						<p>Press <kbd>Space</kbd> to continue</p>
+						<button onclick={togglePause} class="resume-button">▶ Resume</button>
 					</div>
 				</div>
 			{/if}
@@ -1613,6 +1754,13 @@
 		color: #f7f6f6ff;
 		font-family: 'Courier New', monospace;
 	}
+	
+	/* Hide subtitle on mobile/small screens */
+	@media (max-width: 768px) {
+		.game-subtitle {
+			display: none;
+		}
+	}
 
 	/* Game Stats Bar (Horizontal) */
 	.game-stats-bar {
@@ -1960,6 +2108,30 @@
 		box-shadow: 0 0 5px rgba(37, 99, 235, 0.3);
 	}
 
+	.resume-button {
+		margin-top: 1rem;
+		padding: 0.75rem 2rem;
+		font-size: 1.25rem;
+		font-family: 'Courier New', monospace;
+		background: linear-gradient(180deg, #FFFF00 0%, #FFD700 100%);
+		color: #000;
+		border: 2px solid #FFFF00;
+		border-radius: 8px;
+		cursor: pointer;
+		transition: all 0.3s;
+		font-weight: bold;
+		box-shadow: 0 0 20px rgba(255, 255, 0, 0.5);
+	}
+
+	.resume-button:hover {
+		transform: scale(1.05);
+		box-shadow: 0 0 30px rgba(255, 255, 0, 0.8);
+	}
+
+	.resume-button:active {
+		transform: scale(1.02);
+	}
+
 	/* Countdown Overlay */
 	.countdown-overlay {
 		position: absolute;
@@ -2022,6 +2194,82 @@
 		}
 	}
 
+	/* Mobile control buttons */
+	.control-btn {
+		background: #222;
+		border: 2px solid #666;
+		color: #ffff00;
+		padding: 1rem;
+		font-family: 'Courier New', monospace;
+		font-size: 1.5rem;
+		cursor: pointer;
+		transition: all 0.2s;
+		border-radius: 8px;
+		user-select: none;
+		-webkit-user-select: none;
+		touch-action: manipulation;
+	}
+
+	.control-btn:hover,
+	.control-btn:active {
+		background: #333;
+		border-color: #ffff00;
+		box-shadow: 0 0 10px rgba(255, 255, 0, 0.3);
+	}
+	
+	.mobile-controls {
+		display: none; /* Hidden by default on desktop */
+	}
+	
+	/* Mobile dropdown toggles */
+	.mobile-dropdown-toggles {
+		display: none;
+		gap: 0.5rem;
+		margin-top: 0.5rem;
+		justify-content: center;
+	}
+	
+	.dropdown-toggle {
+		background: rgba(37, 99, 235, 0.2);
+		border: 2px solid rgba(37, 99, 235, 0.4);
+		color: #00FFFF;
+		padding: 0.5rem 1rem;
+		font-family: 'Courier New', monospace;
+		font-size: 0.875rem;
+		cursor: pointer;
+		border-radius: 6px;
+		transition: all 0.2s;
+		font-weight: bold;
+	}
+	
+	.dropdown-toggle.active {
+		background: rgba(37, 99, 235, 0.4);
+		border-color: #2563eb;
+	}
+	
+	.dropdown-toggle:hover {
+		background: rgba(37, 99, 235, 0.3);
+		border-color: rgba(37, 99, 235, 0.6);
+	}
+	
+	.mobile-dropdown {
+		background: linear-gradient(180deg, #1a1a2e 0%, #0f0f1e 100%);
+		border: 2px solid #2563eb;
+		border-radius: 8px;
+		padding: 1rem;
+		margin-top: 0.5rem;
+		box-shadow: 0 0 20px rgba(37, 99, 235, 0.3);
+	}
+	
+	.mobile-dropdown .control-item {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+		padding: 0.5rem 0;
+		color: #f7f6f6ff;
+		font-size: 0.875rem;
+	}
+	
 	/* Responsive Design */
 	@media (max-width: 1200px) {
 		.game-layout {
@@ -2049,21 +2297,27 @@
 	@media (max-width: 768px) {
 		.pacman-game-container {
 			padding: 1rem;
-			/* Allow scrolling on small screens */
-			overflow-y: auto;
+			/* Disable scrolling on small screens */
+			overflow: hidden;
 		}
 
-		/* Allow page scroll while still capturing swipes in game area */
+		/* Enable swipes for game controls */
 		.game-area {
-			touch-action: pan-y;
+			touch-action: none;
 		}
 
 		.game-title {
 			font-size: 1.75rem;
 		}
-
+		
+		/* Hide desktop panels */
 		.side-panel {
-			min-width: auto;
+			display: none !important;
+		}
+		
+		/* Show mobile dropdown toggles */
+		.mobile-dropdown-toggles {
+			display: flex;
 		}
 
 		.panel-section {
@@ -2075,29 +2329,9 @@
 			flex-direction: column;
 		}
 
-		/* Place mobile controls under the canvas on small screens */
+		/* Hide mobile arrow controls on small screens */
 		.mobile-controls {
-			position: static;
-			display: block;
-			margin-top: 0.75rem;
-			width: 100%;
-			height: auto;
-			max-width: 560px;
-			margin-left: auto;
-			margin-right: auto;
+			display: none;
 		}
-
-		/* Arrange D-pad in a simple grid */
-		.mobile-controls {
-			display: grid;
-			grid-template-columns: 1fr 1fr 1fr;
-			grid-template-rows: auto auto auto;
-			gap: 0.5rem;
-		}
-
-		.control-up { grid-column: 2; grid-row: 1; }
-		.control-left { grid-column: 1; grid-row: 2; }
-		.control-right { grid-column: 3; grid-row: 2; }
-		.control-down { grid-column: 2; grid-row: 3; }
 	}
 </style>

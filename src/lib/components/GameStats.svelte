@@ -96,8 +96,9 @@
 	
 	@media (max-width: 768px) {
 		.game-stats {
-			top: 5.5rem;
-			right: 1rem;
+			position: static;
+			margin: 0 auto 1rem auto;
+			width: fit-content;
 			font-size: 0.625rem;
 			padding: 0.375rem 0.75rem;
 			gap: 0.5rem;

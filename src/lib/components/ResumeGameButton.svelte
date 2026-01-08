@@ -90,17 +90,19 @@
 	
 	@media (max-width: 768px) {
 		.resume-game-container {
-			top: 1rem;
-			right: 1rem;
+			position: static;
+			margin: 0 auto 1rem auto;
+			width: fit-content;
+			display: block;
 		}
 		
 		.resume-game-button {
-			padding: 0.75rem 1.5rem;
-			font-size: 1rem;
+			padding: 0.625rem 1.25rem;
+			font-size: 0.875rem;
 		}
 		
 		.button-icon {
-			font-size: 1.25rem;
+			font-size: 1rem;
 		}
 	}
 </style>

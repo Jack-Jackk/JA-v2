@@ -82,9 +82,6 @@
 	}
 </script>
 
-<ResumeGameButton />
-<GameStats />
-
 {#if showTutorial}
 	<PortfolioTutorial onComplete={closeTutorial} />
 {/if}
@@ -99,7 +96,13 @@
 	}
 }} />
 
-<div class="arcade-screen">
+<div class="page-container">
+	<div class="mobile-header">
+		<ResumeGameButton />
+		<GameStats />
+	</div>
+
+	<div class="arcade-screen">
 	<div class="screen-border">
 		<div class="screen-content">
 			<!-- Header -->
@@ -166,9 +169,40 @@
 			</footer>
 		</div>
 	</div>
+	</div>
 </div>
 
 <style>
+	.page-container {
+		width: 100%;
+		height: 100%;
+	}
+	
+	.mobile-header {
+		display: none;
+	}
+	
+	@media (max-width: 768px) {
+		.page-container {
+			overflow-y: auto;
+			height: 100vh;
+		}
+		
+		.mobile-header {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			padding: 1rem 0.5rem 0 0.5rem;
+			gap: 0.5rem;
+			background: #000;
+		}
+		
+		.arcade-screen {
+			height: auto;
+			min-height: calc(100vh - 8rem);
+		}
+	}
+	
 	:global(body) {
 		overflow: hidden;
 		height: 100vh;
@@ -407,55 +441,80 @@
 	}
 
 	@media (max-width: 768px) {
+		.arcade-screen {
+			padding: 0.5rem;
+		}
+		
 		.screen-border {
-			padding: 1rem;
+			padding: 0.75rem;
+			border-width: 4px;
 		}
 
 		.screen-content {
-			padding: 1rem;
+			padding: 0.75rem;
 		}
 
 		.arcade-header {
-			font-size: 0.75rem;
+			font-size: 0.65rem;
+			margin-bottom: 1rem;
 		}
 
 		.display-area {
 			grid-template-columns: 1fr;
 			max-height: none;
+			gap: 1rem;
 		}
 
 		.left-column {
-			max-height: 250px;
+			max-height: 200px;
+			overflow-y: auto;
+		}
+		
+		.right-column {
+			overflow-y: auto;
+			max-height: 300px;
 		}
 
 		.select-item {
-			font-size: 0.875rem;
-			padding: 0.5rem;
+			font-size: 0.8125rem;
+			padding: 0.5rem 0.75rem;
+			gap: 0.5rem;
 		}
 
 		.company-name {
-			font-size: 1rem;
+			font-size: 0.9375rem;
 		}
 
 		.achievement-item {
-			font-size: 0.875rem;
+			font-size: 0.8125rem;
+			line-height: 1.5;
 		}
 
 		.arcade-footer {
 			grid-template-columns: 1fr;
+			gap: 0.75rem;
 		}
 
 		.controls {
 			flex-direction: column;
 			width: 100%;
+			gap: 0.5rem;
 		}
 
 		.control-btn {
 			width: 100%;
+			padding: 0.625rem 1rem;
+			font-size: 0.9375rem;
+			touch-action: manipulation;
+		}
+		
+		.control-hint {
+			font-size: 0.6875rem;
 		}
 
 		.counter {
 			text-align: center;
+			font-size: 0.8125rem;
 		}
 	}
 </style>
