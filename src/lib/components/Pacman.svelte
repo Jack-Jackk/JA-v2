@@ -1807,8 +1807,10 @@
 		display: flex;
 		gap: 2rem;
 		align-items: flex-start;
+		justify-content: center;
 		max-width: 1200px;
 		width: 100%;
+		margin: 0 auto;
 	}
 
 	.game-area {
@@ -2097,24 +2099,6 @@
 		font-family: 'Courier New', monospace;
 	}
 
-	.pause-content p {
-		font-size: 1.125rem;
-		margin: 0;
-		color: #f7f6f6ff;
-		font-family: 'Courier New', monospace;
-	}
-
-	.pause-content kbd {
-		background-color: #0a0a15;
-		border: 1px solid #2563eb;
-		border-radius: 3px;
-		padding: 0.25rem 0.5rem;
-		font-family: 'Courier New', monospace;
-		color: #00FFFF;
-		font-size: 1rem;
-		box-shadow: 0 0 5px rgba(37, 99, 235, 0.3);
-	}
-
 	.resume-button {
 		margin-top: 1rem;
 		padding: 0.75rem 2rem;
@@ -2351,13 +2335,29 @@
 			overflow: hidden;
 		}
 
-		/* Enable swipes for game controls */
+		/* Scale down game area by 40% using zoom for better touch compatibility */
 		.game-area {
+			zoom: 0.6;
 			touch-action: none;
 		}
 
 		.game-title {
 			font-size: 1.75rem;
+		}
+		
+		/* Make scoreboard vertical with smaller fonts */
+		.game-stats-bar {
+			flex-direction: column;
+			gap: 0.5rem;
+			padding: 0.75rem;
+		}
+		
+		.stat-item-horizontal .stat-label {
+			font-size: 0.75rem;
+		}
+		
+		.stat-item-horizontal .stat-value {
+			font-size: 0.875rem;
 		}
 		
 		/* Hide desktop panels */

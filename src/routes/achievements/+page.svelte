@@ -273,8 +273,9 @@
 									<div class="detail-item">▸ {detail}</div>
 								{/each}
 							</div>
-						</div>
-					</div>
+						</div>					<div class="scroll-indicator">
+						<span class="scroll-arrow">▼</span>
+					</div>					</div>
 				</div>
 			</main>
 
@@ -542,6 +543,35 @@
 		overflow: hidden;
 		display: flex;
 		flex-direction: column;
+		position: relative;
+	}
+
+	.scroll-indicator {
+		position: absolute;
+		bottom: 1rem;
+		left: 50%;
+		transform: translateX(-50%);
+		pointer-events: none;
+		z-index: 10;
+	}
+
+	.scroll-arrow {
+		display: block;
+		color: #ffff00;
+		font-size: 1.5rem;
+		animation: scroll-pulse 2s ease-in-out infinite;
+		text-shadow: 0 0 10px #ffff00, 0 0 20px #ffff00;
+	}
+
+	@keyframes scroll-pulse {
+		0%, 100% {
+			opacity: 0.3;
+			transform: translateY(0);
+		}
+		50% {
+			opacity: 1;
+			transform: translateY(4px);
+		}
 	}
 
 	.panel-border {

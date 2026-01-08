@@ -10,7 +10,7 @@ export const GRID_HEIGHT = 22;
 export const GAME_SPEED = 150; // Player speed (slightly faster than bugs)
 
 // Cell size for rendering (in pixels)
-export const CELL_SIZE = 16;
+export const CELL_SIZE = 23;
 
 // Points
 export const DOT_POINTS = 10; // Points for collecting a code bit

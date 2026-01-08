@@ -30,7 +30,7 @@
 						<div class="item-header">
 							<span class="item-label">Resume Game Button</span>
 						</div>
-						<div class="item-description">Click the button at the top to return to the game</div>
+						<div class="item-description">Click the resume button to return to the game</div>
 					</div>
 				</div>
 			</div>

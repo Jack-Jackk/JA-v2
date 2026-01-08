@@ -1,37 +1,70 @@
 <script>
 	import Ghost from '$lib/components/Ghost.svelte';
+	import { onMount } from 'svelte';
 	
 	let { onComplete } = $props();
 	let currentStep = $state(0);
+	let isMobile = $state(false);
 	
-	const steps = [
+	onMount(() => {
+		isMobile = window.innerWidth <= 768;
+	});
+	
+	const desktopSteps = [
 		{
 			title: "CONTROLS",
 			content: [
-				{ icon: "↑ ↓ ← →", label: "Arrow Keys", description: "Move Jac-Man (Desktop)", isControl: true },
-				{ icon: "W A S D", label: "WASD Keys", description: "Alternative movement (Desktop)", isControl: true },
-				{ icon: "👆", label: "Swipe", description: "Move Jac-Man (Mobile)", isControl: true },
-				{ icon: "ESC", label: "Pause", description: "Pause/Resume game (Desktop)", isControl: true },
+				{ icon: "↑ ↓ ← →", label: "Arrow Keys", description: "Move Jac-Man", isControl: true },
+				{ icon: "W A S D", label: "WASD Keys", description: "Alternative movement", isControl: true },
+				{ icon: "ESC", label: "Pause", description: "Pause/Resume game", isControl: true },
 				{ icon: "R", label: "Restart", description: "Restart game", isControl: true }
 			]
 		},
-	{
-		title: "PORTFOLIO FRUITS",
-		content: [
-			{ icon: "E", label: "Experience Fruit", points: "1000 pts", description: "View work experience + invincibility boost", color: "#3b82f6" },
-			{ icon: "P", label: "Projects Fruit", points: "1000 pts", description: "View projects + invincibility boost", color: "#10b981" },
-			{ icon: "A", label: "Achievements Fruit", points: "1000 pts", description: "View achievements + invincibility boost", color: "#f59e0b" }
-		]
-	},
-	{
-		title: "GAME ELEMENTS",
-		content: [
-			{ isDot: true, label: "Bit", points: "10 pts", description: "Collect all the bits" },
-			{ isPowerPellet: true, label: "Forum Post", points: "50 pts", description: "Debug Mode. Makes bugs catchable for 10 seconds" },
-			{ isGhost: true, label: "Bugs", points: "100 pts", description: "Catch bugs while in debug mode" }
-		]
-	}
-];
+		{
+			title: "PORTFOLIO FRUITS",
+			content: [
+				{ icon: "E", label: "Experience Fruit", points: "1000 pts", description: "View work experience + invincibility boost", color: "#3b82f6" },
+				{ icon: "P", label: "Projects Fruit", points: "1000 pts", description: "View projects + invincibility boost", color: "#10b981" },
+				{ icon: "A", label: "Achievements Fruit", points: "1000 pts", description: "View achievements + invincibility boost", color: "#f59e0b" }
+			]
+		},
+		{
+			title: "GAME ELEMENTS",
+			content: [
+				{ isDot: true, label: "Bit", points: "10 pts", description: "Collect all the bits" },
+				{ isPowerPellet: true, label: "Forum Post", points: "50 pts", description: "Debug Mode. Makes bugs catchable for 10 seconds" },
+				{ isGhost: true, label: "Bugs", points: "100 pts", description: "Catch bugs while in debug mode" }
+			]
+		}
+	];
+
+	const mobileSteps = [
+		{
+			title: "CONTROLS",
+			content: [
+				{ icon: "👆", label: "Swipe", description: "Swipe in any direction to move Jac-Man", isControl: true },
+				{ icon: "☰", label: "Controls Menu", description: "Tap for pause, restart, and home options", isControl: true }
+			]
+		},
+		{
+			title: "PORTFOLIO FRUITS",
+			content: [
+				{ icon: "E", label: "Experience Fruit", points: "1000 pts", description: "View work experience + invincibility boost", color: "#3b82f6" },
+				{ icon: "P", label: "Projects Fruit", points: "1000 pts", description: "View projects + invincibility boost", color: "#10b981" },
+				{ icon: "A", label: "Achievements Fruit", points: "1000 pts", description: "View achievements + invincibility boost", color: "#f59e0b" }
+			]
+		},
+		{
+			title: "GAME ELEMENTS",
+			content: [
+				{ isDot: true, label: "Bit", points: "10 pts", description: "Collect all the bits" },
+				{ isPowerPellet: true, label: "Forum Post", points: "50 pts", description: "Debug Mode. Makes bugs catchable for 10 seconds" },
+				{ isGhost: true, label: "Bugs", points: "100 pts", description: "Catch bugs while in debug mode" }
+			]
+		}
+	];
+
+	let steps = $derived(isMobile ? mobileSteps : desktopSteps);
 
 function nextStep() {
 	if (currentStep < steps.length - 1) {
