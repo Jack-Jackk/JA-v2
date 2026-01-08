@@ -318,7 +318,7 @@
 			display: flex;
 			flex-direction: column;
 			align-items: center;
-			padding: 1rem 0.5rem 0 0.5rem;
+			padding: 3rem 0.5rem 0 0.5rem;
 			gap: 0.5rem;
 			background: #000;
 		}
